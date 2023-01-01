@@ -1,4 +1,10 @@
-def PascalTriangle(limit):
+def PascalTriangle(limit:int) -> list:
+    """
+    limit
+        sets the limit on the number of output layers.
+
+    Tip: If you need to use an unlimited number of layers, you can use PascalTriangle_Loop function.
+    """
     Result = [1]
     for times in range(int(limit)):
         yield Result
@@ -11,7 +17,10 @@ def PascalTriangle(limit):
                 _Product.append(Result[i] + Result[i+1])
         Result = _Product
 
-def PascalTriangle_Loop():
+def PascalTriangle_Loop() -> list:
+    """
+    Warning: This function does not limit the number of layers, please use the for loop traversal with caution
+    """
     Result = [1]
     while True:
         yield Result
@@ -23,3 +32,6 @@ def PascalTriangle_Loop():
             else:
                 _Product.append(Result[i] + Result[i+1])
         Result = _Product
+
+i = PascalTriangle_Loop()
+print(type(i))

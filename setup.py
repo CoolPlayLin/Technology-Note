@@ -12,7 +12,6 @@ setuptools.setup(
         long_description=README,
         long_description_content_type='text/markdown',
         packages=setuptools.find_packages(),
-        license='GPL',
         project_urls={
             "Bug Report": "https://github.com/CoolPlayLin/Technology-Note/issues/new",
             "Feature Request": "https://github.com/CoolPlayLin/Technology-Note/issues/new"
