@@ -33,5 +33,6 @@ def PascalTriangle_Loop() -> list:
                 _Product.append(Result[i] + Result[i+1])
         Result = _Product
 
-i = PascalTriangle_Loop()
-print(type(i))
+# 调试
+if __name__ == "__main__":
+    pass

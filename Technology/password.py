@@ -38,3 +38,7 @@ class Encrypt:
             Dictionary[each] = StringList[StringList.index(each) + Offset] if StringList.index(each) + Offset < len(StringList) else StringList[StringList.index(each) - len(StringList) + Offset]
         
         return Dictionary
+
+# 调试
+if __name__ == "__main__":
+    pass
