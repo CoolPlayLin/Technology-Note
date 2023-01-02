@@ -1,7 +1,8 @@
 class Encrypt:
-    Uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    Lowercase = "abcdefghijklmnopqrstuvwxyz"
-    Numbers = "123456789"
+    def __init__(self) -> None:
+        self.Uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.Lowercase = "abcdefghijklmnopqrstuvwxyz"
+        self.Numbers = "123456789"
 
     def Dictionary(self, Offset:int, Uppercase=True, Lowercase=False, Number=False, Self_String=None) -> dict:
         """
