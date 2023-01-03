@@ -14,6 +14,7 @@
 [Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.2)
 [Package](https://pypi.org/project/Technology-Note/0.0.2/)
 
-# Main Branch
+# Main
 1. Add: Changelog
 2. Optimized: The Encrypt class adds constructors
+3. Change: Update the directory structure and optimize Setup.py files
