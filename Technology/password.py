@@ -2,18 +2,38 @@ __all__ = ["Dictionary", "Encrypt"]
 
 class Encrypt:
     def __init__(self) -> None:
-        self.Mode = ["Strict", "Ignore"]
+        self.Mode = ["Strict", "Ignore", "Retain"]
+        self.Ignore = [" "]
  
-    def Encrypt(self, Text:str, Dictionary:dict, Mode="Strict", Add_Spaces=True) -> str:
-        if bool(Add_Spaces):
-            Dictionary[" "] = " "
-        __Undefined = [Undefined for Undefined in Text if Undefined not in Dictionary]
-        _ErrorMessage = "The plaintext entered is empty" if not bool(Text) else "The current pattern does not exist" if Mode not in self.Mode else "The value of the dictionary must be of type dict" if type(Dictionary) is not dict else "Contains characters that are not defined in the dictionary {}{}".format("\n", str( __Undefined)) if bool(__Undefined) and self.Mode.index(Mode) == 0 else None
+    def Encrypt(self, Text:str, Dictionary:dict, Mode="Strict", Add_Ignore=True) -> str:
+        """
+        Text
+            Text that needs to be encrypted
+        Dictionary
+            Dictionary required for encryption(can be generated using the Dictionary object)
+        Mode
+            Encrypted mode(Strict by Default), You can view all modes in the Mode property of the object.
+        Add_Ignore
+            Add characters that need to be ignored in the dictionary, these characters will be preserved (spaces are disabled by default and enabled), and you can modify the value of Ignore to change them
+
+        Mode_Note
+            Strict: Include all the characters in plaintext in the dictionary, if they do not, they will self-detonate.
+            Ignore: Ignore and discard all characters that are not included in the dictionary.
+            Retain: Keep undefined characters (undefined characters are automatically added to the dictionary)
+        """
+        _ModeType = self.Mode.index(Mode)
+        if bool(Add_Ignore):
+            for each in self.Ignore:
+                Dictionary[each] = each
+        _Undefined = [Undefined for Undefined in Text if Undefined not in Dictionary] if _ModeType != 0 else None
+        _ErrorMessage = "The plaintext entered is empty" if not bool(Text) else "The current pattern does not exist" if Mode not in self.Mode else "The value of the dictionary must be of type dict" if type(Dictionary) is not dict else "Contains characters that are not defined in the dictionary {}{}".format("\n", str( _Undefined)) if bool(_Undefined) and self.Mode.index(Mode) == 0 else None
         if bool(_ErrorMessage):
             raise Exception(_ErrorMessage)
-        _ModeType = self.Mode.index(Mode)
         _Password = ""
-        _PasswordList = [Dictionary[each] for each in Text] if _ModeType == 0 else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType == 1 else None
+        if _ModeType == 2:
+            for each in _Undefined:
+                Dictionary[each] = each
+        _PasswordList = [Dictionary[each] for each in Text] if _ModeType == 0 else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType == 1 else [Dictionary[each] for each in Text] if _ModeType == 2 else None
         for each in _PasswordList:
             _Password += each
 
@@ -60,6 +80,9 @@ class Dictionary:
             _Dictionary[each] = _StringList[_StringList.index(each) + _Offset] if _StringList.index(each) + _Offset < len(_StringList) else _StringList[_StringList.index(each) - len(_StringList) + _Offset]
         
         return _Dictionary
+
+class Decrypt:
+    pass
 
 # 调试
 if __name__ == "__main__":
