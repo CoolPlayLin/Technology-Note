@@ -12,7 +12,7 @@ def File_Read():
 def Main():
     setuptools.setup(
             name="Technology-Note",
-            version="0.0.2",
+            version="0.0.3",
             author="CoolPlayLin",
             author_email="help@api-coolplaylin.eu.org",
             description="Learn the techniques developed in Python",
