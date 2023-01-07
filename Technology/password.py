@@ -1,49 +1,23 @@
 __all__ = ["Dictionary", "Encrypt"]
 
-class Encrypt:
-    def __init__(self) -> None:
+class TechnologyError(Exception):
+    pass
+
+class Password:
+    def Set_Config(self) -> None:
         self.Mode = ["Strict", "Ignore", "Retain"]
-        self.Ignore = [" "]
- 
-    def Encrypt(self, Text:str, Dictionary:dict, Mode="Strict", Add_Ignore=True) -> str:
-        """
-        Text
-            Text that needs to be encrypted
-        Dictionary
-            Dictionary required for encryption(can be generated using the Dictionary object)
-        Mode
-            Encrypted mode(Strict by Default), You can view all modes in the Mode property of the object.
-        Add_Ignore
-            Add characters that need to be ignored in the dictionary, these characters will be preserved (spaces are disabled by default and enabled), and you can modify the value of Ignore to change them
-
-        Mode_Note
-            Strict: Include all the characters in plaintext in the dictionary, if they do not, they will self-detonate.
-            Ignore: Ignore and discard all characters that are not included in the dictionary.
-            Retain: Keep undefined characters (undefined characters are automatically added to the dictionary)
-        """
-        _ModeType = self.Mode.index(Mode)
-        if bool(Add_Ignore):
-            for each in self.Ignore:
-                Dictionary[each] = each
-        _Undefined = [Undefined for Undefined in Text if Undefined not in Dictionary] if _ModeType != 0 else None
-        _ErrorMessage = "The plaintext entered is empty" if not bool(Text) else "The current pattern does not exist" if Mode not in self.Mode else "The value of the dictionary must be of type dict" if type(Dictionary) is not dict else "Contains characters that are not defined in the dictionary {}{}".format("\n", str( _Undefined)) if bool(_Undefined) and self.Mode.index(Mode) == 0 else None
-        if bool(_ErrorMessage):
-            raise Exception(_ErrorMessage)
-        _Password = ""
-        if _ModeType == 2:
-            for each in _Undefined:
-                Dictionary[each] = each
-        _PasswordList = [Dictionary[each] for each in Text] if _ModeType == 0 else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType == 1 else [Dictionary[each] for each in Text] if _ModeType == 2 else None
-        for each in _PasswordList:
-            _Password += each
-
-        return _Password
-
-class Dictionary:
-    def __init__(self) -> None:
+        self.Ignore = [" ", "\n", "(", ")", ",", ".", "_", ":", "-"]
+    def Set_Str(self) -> None:
         self.Uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.Lowercase = "abcdefghijklmnopqrstuvwxyz"
         self.Numbers = "1234567890"
+    def Export_Undefined(self, Text:str, Dictionary:dict) -> list:
+        return [Undefined for Undefined in Text if Undefined not in Dictionary]
+
+
+class Dictionary(Password):
+    def __init__(self) -> None:
+        super().Set_Str()
 
 
     def Caesar(self, Offset:int, Uppercase=True, Lowercase=False, Number=False, Self_String=None) -> dict:
@@ -73,7 +47,7 @@ class Dictionary:
         _Source = Self_String if bool(Self_String) else (_Upper if bool(Uppercase) else "") + (_Lower if bool(Lowercase) else "") + (_Numbers if bool(Number) else "")
         _ErrorMessage = "The offset data exceeds the limit" if _Offset > len(_Source) else "The offset data exceeds the limit" if _Source is None else False
         if bool(_ErrorMessage):
-            raise Exception(_ErrorMessage)
+            raise TechnologyError(_ErrorMessage)
         for each in _Source:
             _StringList.append(each)
         for each in _StringList:
@@ -81,8 +55,51 @@ class Dictionary:
         
         return _Dictionary
 
-class Decrypt:
-    pass
+class Encrypt(Password):
+    def __init__(self) -> None:
+        super().Set_Config()
+    
+ 
+    def Caesar(self, Text:str, Dictionary:dict, Mode="Strict", Add_Ignore=True) -> str:
+        """
+        Text
+            Text that needs to be encrypted
+        Dictionary
+            Dictionary required for encryption(can be generated using the Dictionary object)
+        Mode
+            Encrypted mode(Strict by Default), You can view all modes in the Mode property of the object.
+        Add_Ignore
+            Add characters that need to be ignored in the dictionary, these characters will be preserved (spaces are disabled by default and enabled), and you can modify the value of Ignore to change them
+
+        Mode_Note
+            Strict: Include all the characters in plaintext in the dictionary, if they do not, they will self-detonate.
+            Ignore: Ignore and discard all characters that are not included in the dictionary.
+            Retain: Keep undefined characters (undefined characters are automatically added to the dictionary)
+        """
+        # 错误检查
+        if bool(Add_Ignore):
+            for each in self.Ignore:
+                Dictionary[each] = each
+        _Undefined = super().Export_Undefined(Text, Dictionary) # 导出未定义的字符
+        _ErrorMessage = "The plaintext entered is empty" if not bool(str(Text)) else "The current pattern does not exist" if Mode not in self.Mode else "The value of the dictionary must be of type dict" if type(Dictionary) is not dict else "Contains characters that are not defined in the dictionary {}{}".format("\n", str(_Undefined)) if bool(_Undefined) and self.Mode.index(Mode) == 0 else None # 导出错误信息
+        if bool(_ErrorMessage):
+            raise TechnologyError(_ErrorMessage)
+        _ModeType = self.Mode.index(Mode) # 将Mode字符转换为整数
+        _Password = ""
+        if _ModeType == 2 and bool(_Undefined):
+            for each in _Undefined:
+                Dictionary[each] = each # Retain模式添加未定义的字符
+        _PasswordList = [Dictionary[each] for each in Text] if _ModeType == 0 else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType == 1 else [Dictionary[each] for each in Text] if _ModeType == 2 else None # 加密
+        for each in _PasswordList:
+            _Password += each
+
+        return _Password
+class Decrypt(Password):
+    def __init__(self) -> None:
+        super().Set_Config()
+    
+    def Caesar(self, Password:str, Dictionary:dict, Mode="Strict", Add_ignore=True) -> str:
+        _ModeType = self.Mode.index(Mode)
 
 # 调试
 if __name__ == "__main__":
