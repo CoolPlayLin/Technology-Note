@@ -1,7 +1,12 @@
 # Technology-Note
 Learn the techniques developed in Python
 
-### Changelog
+## Install
+```
+python -m pip install Technology
+```
 
-- [English](./Update.md)
-- [简体中文](./Update-zh.md)
+## Docs
+
+- [Wiki](https://github.com/CoolPlayLin/Technology-Note/wiki)
+- [Changelog](./Update.md)
