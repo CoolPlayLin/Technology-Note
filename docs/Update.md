@@ -35,3 +35,5 @@
 
 ## Main
 - Adjust: Integration of data interfaces, change of object names (no longer compatible with previous versions)
+- Optimize: Consolidate repeatedly called code and handle them centrally
+- Change: Function name (no longer compatible with previous versions)

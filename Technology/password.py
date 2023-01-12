@@ -1,6 +1,6 @@
 __all__ = ["Dictionary", "Encrypt"]
 
-class TechnologyError(Exception):
+class PasswordError(Exception):
     pass
 
 class Password:
@@ -13,6 +13,10 @@ class Password:
         self.Numbers = "1234567890"
     def Export_Undefined(self, Text:str, Dictionary:dict) -> list:
         return [Undefined for Undefined in Text if Undefined not in Dictionary]
+    def Export_ErrorMessage_Decrypt_Encrypt(self, Text:str, Dictionary, Mode:int, Undefined:list):
+        return "The plaintext entered is empty" if not bool(str(Text)) else "The Value of Dictionary is empty" if not bool(Dictionary) else "The current pattern does not exist" if Mode not in self.Mode else "The value of the dictionary must be of type dict" if type(Dictionary) is not dict else "Contains characters that are not defined in the dictionary {}{}".format("\n", str(Undefined)) if bool(Undefined) and self.Mode.index(Mode) == 0 and bool([each for each in Undefined if each not in self.Ignore]) else None
+    def Export_ErrorMessage_Dictionary(self, Offset:int, Source:str):
+        return "The offset data exceeds the limit" if Offset > len(Source) else "The offset data exceeds the limit" if Source is None else None
 
 
 class Dictionary(Password):
@@ -20,7 +24,7 @@ class Dictionary(Password):
         super().Set_Str()
 
 
-    def Caesar(self, Offset:int, Uppercase=True, Lowercase=False, Number=False, Self_String=None) -> dict:
+    def Caesar(self, Offset:int, Uppercase:bool=True, Lowercase:bool=False, Number:bool=False, Self_String:str=None) -> dict:
         """
         Offset
             Sets the number of character offset bits
@@ -45,9 +49,9 @@ class Dictionary(Password):
         _StringList = []
         _Dictionary = {}
         _Source = Self_String if bool(Self_String) else (_Upper if bool(Uppercase) else "") + (_Lower if bool(Lowercase) else "") + (_Numbers if bool(Number) else "")
-        _ErrorMessage = "The offset data exceeds the limit" if _Offset > len(_Source) else "The offset data exceeds the limit" if _Source is None else False
+        _ErrorMessage = super().Export_ErrorMessage_Dictionary(_Offset, _Source)
         if bool(_ErrorMessage):
-            raise TechnologyError(_ErrorMessage)
+            raise PasswordError(_ErrorMessage)
         for each in _Source:
             _StringList.append(each)
         for each in _StringList:
@@ -60,7 +64,7 @@ class Encrypt(Password):
         super().Set_Config()
     
  
-    def Caesar(self, Text:str, Dictionary:dict, Mode="Strict", Add_Ignore=True) -> str:
+    def Substitution(self, Text:str, Dictionary:dict, Mode:str="Strict", Add_Ignore:bool=True) -> str:
         """
         Text
             Text that needs to be encrypted
@@ -77,28 +81,37 @@ class Encrypt(Password):
             Retain: Keep undefined characters (undefined characters are automatically added to the dictionary)
         """
         # 错误检查
-        if bool(Add_Ignore):
-            for each in self.Ignore:
-                Dictionary[each] = each
         _Undefined = super().Export_Undefined(Text, Dictionary) # 导出未定义的字符
-        _ErrorMessage = "The plaintext entered is empty" if not bool(str(Text)) else "The current pattern does not exist" if Mode not in self.Mode else "The value of the dictionary must be of type dict" if type(Dictionary) is not dict else "Contains characters that are not defined in the dictionary {}{}".format("\n", str(_Undefined)) if bool(_Undefined) and self.Mode.index(Mode) == 0 else None # 导出错误信息
+        _ErrorMessage = super().Export_ErrorMessage_Decrypt_Encrypt(Text, Dictionary, Mode, _Undefined)
         if bool(_ErrorMessage):
-            raise TechnologyError(_ErrorMessage)
+            raise PasswordError(_ErrorMessage)
         _ModeType = self.Mode.index(Mode) # 将Mode字符转换为整数
         _Password = ""
+        # 添加默认忽略字符
+        if Add_Ignore:
+            for each in self.Ignore:
+                Dictionary[each] = each
         if _ModeType == 2 and bool(_Undefined):
             for each in _Undefined:
                 Dictionary[each] = each # Retain模式添加未定义的字符
-        _PasswordList = [Dictionary[each] for each in Text] if _ModeType == 0 else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType == 1 else [Dictionary[each] for each in Text] if _ModeType == 2 else None # 加密
+        _PasswordList = [Dictionary[each] for each in Text] if _ModeType == 0 or _ModeType == 2 else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType == 1 else None # 加密
         for each in _PasswordList:
             _Password += each
 
         return _Password
+    
+    def RSA(self):
+        pass
 class Decrypt(Password):
     def __init__(self) -> None:
         super().Set_Config()
     
-    def Caesar(self, Password:str, Dictionary:dict, Mode="Strict", Add_ignore=True) -> str:
+    def Substitution(self, Password:str, Dictionary:dict, Mode:str="Strict", Add_ignore:bool=True) -> str:
+        Dictionary = {Value:Key for Key, Value in Dictionary.items()}
+        _Undefined = super().Export_Undefined(Password, Dictionary)
+        if Add_ignore:
+            for each in self.Ignore:
+                Dictionary[each] = each
         _ModeType = self.Mode.index(Mode)
 
 # 调试
