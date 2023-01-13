@@ -33,8 +33,14 @@
 [Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.3/)
 [Package](https://pypi.org/project/Technology-Note/0.0.3/)
 
-## Main
+## V0.0.4
 - 调整：整合数据接口，更改对象名称（不再与以前的版本兼容）
 - 优化：整合重复调用的代码，集中处理它们
 - 更改：函数名（不再与之前版本兼容）
 - **新功能**：Decrypt对象
+  
+[Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.4/)
+[Package](https://pypi.org/project/Technology-Note/0.0.4/)
+
+## Main
+暂无

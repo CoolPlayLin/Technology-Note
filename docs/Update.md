@@ -33,8 +33,14 @@
 [Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.3/)
 [Package](https://pypi.org/project/Technology-Note/0.0.3/)
 
-## Main
+## V0.0.4
 - Adjust: Integration of data interfaces, change of object names (no longer compatible with previous versions)
 - Optimize: Consolidate repeatedly called code and handle them centrally
 - Change: Function name (no longer compatible with previous versions)
 - **New**: Class Decrypt
+
+[Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.4/)
+[Package](https://pypi.org/project/Technology-Note/0.0.4/)
+
+## Main
+Not Found

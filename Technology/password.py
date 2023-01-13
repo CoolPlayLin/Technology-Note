@@ -4,6 +4,9 @@ class PasswordError(Exception):
     pass
 
 class Password:
+    """
+    This class is the parent class of all classes in this module, and centrally manages the functions that are called repeatedly
+    """
     # 设置配置
     def Set_Config(self) -> None:
         self.Mode = ["Strict", "Ignore", "Retain"]
@@ -22,6 +25,9 @@ class Password:
     # 导出错误信息(Dictionary专用)
     def Export_ErrorMessage_Dictionary(self, Offset:int, Source:str):
         return "The offset data exceeds the limit" if Offset > len(Source) else "The offset data exceeds the limit" if Source is None else None
+    # 将未定义的字符导出为字典
+    def Export_Undefined_Dictionary(self, Undefined:list) -> dict:
+        return {each:each for each in Undefined}
 
 
 class Dictionary(Password):
@@ -94,11 +100,9 @@ class Encrypt(Password):
         _Password = ""
         # 添加默认忽略字符
         if Add_Ignore:
-            for each in self.Ignore:
-                Dictionary[each] = each
+            Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore))
         if _ModeType == 2 and bool(_Undefined):
-            for each in _Undefined:
-                Dictionary[each] = each # Retain模式添加未定义的字符
+            Dictionary.update(super().Export_Undefined_Dictionary(_Undefined)) # Retain模式添加未定义的字符
         _PasswordList = [Dictionary[each] for each in Text] if _ModeType in [0, 2] else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType == 1 else None # 加密
         for each in _PasswordList:
             _Password += each
@@ -129,31 +133,21 @@ class Decrypt(Password):
         """
         Dictionary = {Value:Key for Key, Value in Dictionary.items()}
         _Undefined = super().Export_Undefined(Password, Dictionary)
-        if Add_Ignore:
-            for each in self.Ignore:
-                Dictionary[each] = each
         _ModeType = self.Mode.index(Mode) # 将Mode字符转换为整数
         _ErrorMessage = super().Export_ErrorMessage_Decrypt_Encrypt(Password, Dictionary, Mode, _Undefined)
         if bool(_ErrorMessage):
             raise PasswordError(_ErrorMessage)
         _Text = ""
         if Add_Ignore:
-            for each in self.Ignore:
-                Dictionary[each] = each
+            Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore))
         if _ModeType == 2 and bool(_Undefined):
-            for each in _Undefined:
-                Dictionary[each] = each # Retain模式添加未定义的字符
-        print(Dictionary)
+            Dictionary.update(super().Export_Undefined_Dictionary(_Undefined)) # Retain模式添加未定义的字符
         _TextList = [Dictionary[each] for each in Password] if _ModeType in [0, 2] else [Dictionary[each] for each in Password if each in Dictionary] if _ModeType == 1 else None # 加密
+        # 将列表转换成字符
         for each in _TextList:
             _Text += each
         
         return _Text
 # 调试
 if __name__ == "__main__":
-    d = Decrypt()
-    c = Encrypt()
-    a = Dictionary()
-    p = c.Substitution("Hello", a.Caesar(1, True, True, True))
-    print(p)
-    print(d.Substitution(p, a.Caesar(1), Mode=d.Mode[1]))
+    pass
