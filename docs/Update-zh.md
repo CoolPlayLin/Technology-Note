@@ -43,4 +43,4 @@
 [Package](https://pypi.org/project/Technology-Note/0.0.4/)
 
 ## Main
-暂无
+- 更改：优化了一些功能

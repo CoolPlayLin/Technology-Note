@@ -3,7 +3,7 @@ Learn the techniques developed in Python
 
 ## Install
 ```
-python -m pip install Technology
+python -m pip install Technology-Note
 ```
 
 ## Docs

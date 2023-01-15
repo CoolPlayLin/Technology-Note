@@ -7,24 +7,23 @@ class Password:
     """
     This class is the parent class of all classes in this module, and centrally manages the functions that are called repeatedly
     """
-    # 设置配置
-    def Set_Config(self) -> None:
+    # 初始化
+    def __init__(self) -> None:
         self.Mode = ["Strict", "Ignore", "Retain"]
         self.Ignore = [" ", "\n", "(", ")", ",", ".", "_", ":", "-"]
-    # 设置字符
-    def Set_Str(self) -> None:
         self.Uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.Lowercase = "abcdefghijklmnopqrstuvwxyz"
         self.Numbers = "1234567890"
+        self.ErrorMessageList = {"Empty":["The plaintext entered is empty", "The Value of Dictionary is empty", "The Value of Dictionary is empty"], "Index":["The offset data exceeds the limit", "The offset data exceeds the limit"], "Exist":["The current pattern does not exist", "The value of the dictionary must be of type dict", "Contains characters that are not defined in the dictionary"]}
     # 导出未定义的字符
     def Export_Undefined(self, Text:str, Dictionary:dict) -> list:
-        return [Undefined for Undefined in Text if Undefined not in Dictionary]
+        return [Undefined for Undefined in Text if Undefined not in Dictionary not in self.Ignore]
     # 导出错误信息(Encrypt和Decrypt专用)
     def Export_ErrorMessage_Decrypt_Encrypt(self, Text:str, Dictionary, Mode:int, Undefined:list):
-        return "The plaintext entered is empty" if not bool(str(Text)) else "The Value of Dictionary is empty" if not bool(Dictionary) else "The current pattern does not exist" if Mode not in self.Mode else "The value of the dictionary must be of type dict" if type(Dictionary) is not dict else "Contains characters that are not defined in the dictionary {}{}".format("\n", str(Undefined)) if bool(Undefined) and self.Mode.index(Mode) == 0 and bool([each for each in Undefined if each not in self.Ignore]) else None
+        return self.ErrorMessageList["Empty"][0] if not bool(str(Text)) else self.ErrorMessageList["Empty"][1] if not bool(Dictionary) else self.ErrorMessageList["Exist"][0] if Mode not in self.Mode else self.ErrorMessageList["Exist"][1] if type(Dictionary) is not dict else "{}{}{}".format(self.ErrorMessageList["Exist"][2] ,"\n", str(Undefined)) if bool(Undefined) and self.Mode.index(Mode) == 0 else None
     # 导出错误信息(Dictionary专用)
     def Export_ErrorMessage_Dictionary(self, Offset:int, Source:str):
-        return "The offset data exceeds the limit" if Offset > len(Source) else "The offset data exceeds the limit" if Source is None else None
+        return self.ErrorMessageList["Index"][0] if Offset > len(Source) else self.ErrorMessageList["Index"][1] if Source is None else None
     # 将未定义的字符导出为字典
     def Export_Undefined_Dictionary(self, Undefined:list) -> dict:
         return {each:each for each in Undefined}
@@ -32,7 +31,7 @@ class Password:
 
 class Dictionary(Password):
     def __init__(self) -> None:
-        super().Set_Str()
+        super().__init__()
 
 
     def Caesar(self, Offset:int, Uppercase:bool=True, Lowercase:bool=False, Number:bool=False, Self_String:str=None) -> dict:
@@ -57,14 +56,14 @@ class Dictionary(Password):
         _Lower = self.Lowercase
         _Numbers = self.Numbers
         _Offset = int(Offset)
-        _StringList = []
         _Dictionary = {}
-        _Source = Self_String if bool(Self_String) else (_Upper if bool(Uppercase) else "") + (_Lower if bool(Lowercase) else "") + (_Numbers if bool(Number) else "")
+        _Source = Self_String if bool(Self_String) else (_Upper if bool(Uppercase) else "") + (_Lower if bool(Lowercase) else "") + (_Numbers if bool(Number) else "") # 设置字符
+        # 错误检查
         _ErrorMessage = super().Export_ErrorMessage_Dictionary(_Offset, _Source)
         if bool(_ErrorMessage):
             raise PasswordError(_ErrorMessage)
-        for each in _Source:
-            _StringList.append(each)
+        _StringList = [each for each in _Source] # 导入字符到列表
+        # 生成字典
         for each in _StringList:
             _Dictionary[each] = _StringList[_StringList.index(each) + _Offset] if _StringList.index(each) + _Offset < len(_StringList) else _StringList[_StringList.index(each) - len(_StringList) + _Offset]
         
@@ -72,7 +71,7 @@ class Dictionary(Password):
 
 class Encrypt(Password):
     def __init__(self) -> None:
-        super().Set_Config()
+        super().__init__()
     
  
     def Substitution(self, Text:str, Dictionary:dict, Mode:str="Strict", Add_Ignore:bool=True) -> str:
@@ -103,7 +102,7 @@ class Encrypt(Password):
             Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore))
         if _ModeType == 2 and bool(_Undefined):
             Dictionary.update(super().Export_Undefined_Dictionary(_Undefined)) # Retain模式添加未定义的字符
-        _PasswordList = [Dictionary[each] for each in Text] if _ModeType in [0, 2] else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType == 1 else None # 加密
+        _PasswordList = [Dictionary[each] for each in Text] if _ModeType in [0, 2] else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType in [1] else None # 加密
         for each in _PasswordList:
             _Password += each
 
@@ -113,7 +112,7 @@ class Encrypt(Password):
         pass
 class Decrypt(Password):
     def __init__(self) -> None:
-        super().Set_Config()
+        super().__init__()
     
     def Substitution(self, Password:str, Dictionary:dict, Mode:str="Strict", Add_Ignore:bool=True) -> str:
         """
@@ -142,7 +141,7 @@ class Decrypt(Password):
             Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore))
         if _ModeType == 2 and bool(_Undefined):
             Dictionary.update(super().Export_Undefined_Dictionary(_Undefined)) # Retain模式添加未定义的字符
-        _TextList = [Dictionary[each] for each in Password] if _ModeType in [0, 2] else [Dictionary[each] for each in Password if each in Dictionary] if _ModeType == 1 else None # 加密
+        _TextList = [Dictionary[each] for each in Password] if _ModeType in [0, 2] else [Dictionary[each] for each in Password if each in Dictionary] if _ModeType in [1] else None # 加密
         # 将列表转换成字符
         for each in _TextList:
             _Text += each
