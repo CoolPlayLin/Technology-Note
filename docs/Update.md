@@ -44,3 +44,5 @@
 
 ## Main
 - Changes: Optimized some features
+- **New**: Added fence encryption and decryption
+- Optimize: Some functions implement logic

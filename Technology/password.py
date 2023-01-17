@@ -14,19 +14,37 @@ class Password:
         self.Uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.Lowercase = "abcdefghijklmnopqrstuvwxyz"
         self.Numbers = "1234567890"
-        self.ErrorMessageList = {"Empty":["The plaintext entered is empty", "The Value of Dictionary is empty", "The Value of Dictionary is empty"], "Index":["The offset data exceeds the limit", "The offset data exceeds the limit"], "Exist":["The current pattern does not exist", "The value of the dictionary must be of type dict", "Contains characters that are not defined in the dictionary"]}
+        self.ErrorMessageList = {
+        "Empty":["The plaintext entered is empty", "The Value of Dictionary is empty"],
+        "Index":["The offset data exceeds the limit", "The offset data exceeds the limit"],
+        "Exist":["The current pattern does not exist", "The value of the dictionary must be of type dict", "Contains characters that are not defined in the dictionary"],
+        "Type":["The type of the value must be a string"]}
     # 导出未定义的字符
     def Export_Undefined(self, Text:str, Dictionary:dict) -> list:
         return [Undefined for Undefined in Text if Undefined not in Dictionary not in self.Ignore]
-    # 导出错误信息(Encrypt和Decrypt专用)
-    def Export_ErrorMessage_Decrypt_Encrypt(self, Text:str, Dictionary, Mode:int, Undefined:list):
-        return self.ErrorMessageList["Empty"][0] if not bool(str(Text)) else self.ErrorMessageList["Empty"][1] if not bool(Dictionary) else self.ErrorMessageList["Exist"][0] if Mode not in self.Mode else self.ErrorMessageList["Exist"][1] if type(Dictionary) is not dict else "{}{}{}".format(self.ErrorMessageList["Exist"][2] ,"\n", str(Undefined)) if bool(Undefined) and self.Mode.index(Mode) == 0 else None
+    # 导出错误信息(Encrypt和Decrypt的Substitution专用)
+    def Export_ErrorMessage_Decrypt_Encrypt(self, Text:str, Dictionary, Mode:int, Undefined:list) -> str:
+        return self.ErrorMessageList["Type"][0] if not type(Text) is str else self.ErrorMessageList["Empty"][0] if not bool(str(Text)) else self.ErrorMessageList["Empty"][1] if not bool(Dictionary) else self.ErrorMessageList["Exist"][0] if Mode not in self.Mode else self.ErrorMessageList["Exist"][1] if type(Dictionary) is not dict else "{}{}{}".format(self.ErrorMessageList["Exist"][2] ,"\n", str(Undefined)) if bool(Undefined) and self.Mode.index(Mode) == 0 else None
+    # 导出错误信息(Encrypt和Decrypt的Fence专用)
+    def Export_ErrorMessage_Fence(self, Text:str) -> str:
+        return  self.ErrorMessageList["Type"][0] if not type(Text) is str else self.ErrorMessageList["Empty"][0] if not bool(Text) else None
     # 导出错误信息(Dictionary专用)
-    def Export_ErrorMessage_Dictionary(self, Offset:int, Source:str):
+    def Export_ErrorMessage_Dictionary(self, Offset:int, Source:str) -> str:
         return self.ErrorMessageList["Index"][0] if Offset > len(Source) else self.ErrorMessageList["Index"][1] if Source is None else None
     # 将未定义的字符导出为字典
     def Export_Undefined_Dictionary(self, Undefined:list) -> dict:
         return {each:each for each in Undefined}
+    # 将明文分为两组
+    def Split_Text_Fence(self, Text:str) -> list:
+        _ = 0
+        Group1, Group2 = [], []
+        for each in Text:
+            _ += 1
+            if _ % 2 == 0:
+                Group1.append(each)
+            else:
+                Group2.append(each)
+        return Group1, Group2
 
 
 class Dictionary(Password):
@@ -52,11 +70,7 @@ class Dictionary(Password):
             2. The offset parameter cannot exceed the number of strings to be generated as a dictionary, otherwise it will self-explode
             3. You cannot set Uppercase, Lowercase and Number at the same time without setting Self_String, that is, there is no string to generate, otherwise it will explode.
         """
-        _Upper = self.Uppercase
-        _Lower = self.Lowercase
-        _Numbers = self.Numbers
-        _Offset = int(Offset)
-        _Dictionary = {}
+        _Upper, _Lower, _Numbers, _Offset, _Dictionary = self.Uppercase, self.Lowercase, self.Numbers, int(Offset), {}
         _Source = Self_String if bool(Self_String) else (_Upper if bool(Uppercase) else "") + (_Lower if bool(Lowercase) else "") + (_Numbers if bool(Number) else "") # 设置字符
         # 错误检查
         _ErrorMessage = super().Export_ErrorMessage_Dictionary(_Offset, _Source)
@@ -90,13 +104,12 @@ class Encrypt(Password):
             Ignore: Ignore and discard all characters that are not included in the dictionary.
             Retain: Keep undefined characters (undefined characters are automatically added to the dictionary)
         """
-        # 错误检查
         _Undefined = super().Export_Undefined(Text, Dictionary) # 导出未定义的字符
+        # 错误检查
         _ErrorMessage = super().Export_ErrorMessage_Decrypt_Encrypt(Text, Dictionary, Mode, _Undefined)
         if bool(_ErrorMessage):
             raise PasswordError(_ErrorMessage)
-        _ModeType = self.Mode.index(Mode) # 将Mode字符转换为整数
-        _Password = ""
+        _ModeType, _Password = self.Mode.index(Mode), ""
         # 添加默认忽略字符
         if Add_Ignore:
             Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore))
@@ -108,8 +121,29 @@ class Encrypt(Password):
 
         return _Password
     
-    def RSA(self):
-        pass
+    def Fence(self, Text:str) -> str:
+        """
+        Use the fence password to encrypt plaintext
+
+        Text
+            Text that needs to be encrypted
+        """
+        # 错误检查
+        _ErrorMessage = super().Export_ErrorMessage_Fence(Text)
+        if bool(_ErrorMessage):
+            raise PasswordError(_ErrorMessage)
+        Group1, Group2 = super().Split_Text_Fence(Text) # 文本分组
+        _PasswordList, _Password = [], ""
+        _Times = len(Group1) if len(Group1) == len(Group2) or len(Group1) > len(Group2) else len(Group2) # 确定遍历次数
+        # 加密成列表
+        for each in range(_Times):
+            _PasswordList.append(Group1[each] if each > len(Group2)-1 else Group2[each] if each > len(Group1)-1 else Group1[each]+Group2[each])
+        # 转换为字符串
+        for each in _PasswordList:
+            _Password += each
+
+        return _Password
+        
 class Decrypt(Password):
     def __init__(self) -> None:
         super().__init__()
@@ -132,13 +166,13 @@ class Decrypt(Password):
         """
         Dictionary = {Value:Key for Key, Value in Dictionary.items()}
         _Undefined = super().Export_Undefined(Password, Dictionary)
-        _ModeType = self.Mode.index(Mode) # 将Mode字符转换为整数
+        _ModeType, _Text = self.Mode.index(Mode), ""
         _ErrorMessage = super().Export_ErrorMessage_Decrypt_Encrypt(Password, Dictionary, Mode, _Undefined)
+        # 错误检查
         if bool(_ErrorMessage):
             raise PasswordError(_ErrorMessage)
-        _Text = ""
         if Add_Ignore:
-            Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore))
+            Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore)) # 增加默认忽略的字符
         if _ModeType == 2 and bool(_Undefined):
             Dictionary.update(super().Export_Undefined_Dictionary(_Undefined)) # Retain模式添加未定义的字符
         _TextList = [Dictionary[each] for each in Password] if _ModeType in [0, 2] else [Dictionary[each] for each in Password if each in Dictionary] if _ModeType in [1] else None # 加密
@@ -147,6 +181,29 @@ class Decrypt(Password):
             _Text += each
         
         return _Text
+
+    def Fence(self, Password:str) -> str:
+        """
+        Use the fence password to decrypt password
+
+        Text
+            Text that needs to be decrypt
+        """
+        # 错误检查
+        _ErrorMessage = super().Export_ErrorMessage_Fence(Password)
+        if bool(_ErrorMessage):
+            raise PasswordError(_ErrorMessage)
+        Group1, Group2 = super().Split_Text_Fence(Password)
+        _PasswordList, _Password = [], ""
+        _Times = len(Group1) if len(Group1) == len(Group2) or len(Group1) > len(Group2) else len(Group2) # 确定遍历次数
+        # 加密成列表
+        for each in range(_Times):
+            _PasswordList.append(Group1[each] if each > len(Group2)-1 else Group2[each] if each > len(Group1)-1 else Group1[each]+Group2[each])
+        # 转换为字符串
+        for each in _PasswordList:
+            _Password += each
+        
+        return _Password
 # 调试
 if __name__ == "__main__":
     pass

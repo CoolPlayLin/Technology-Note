@@ -4,7 +4,7 @@ import pathlib
 def File_Read():
     if not (pathlib.Path("README.md")).exists():
         with open("README.md", "w+", encoding="utf-8") as file:
-            with open((pathlib.Path.cwd()/"docs/README.md"), "r", encoding="utf-8") as source:
+            with open((pathlib.Path(__file__).parent/"docs/README.md"), "r", encoding="utf-8") as source:
                 file.write(source.read())
     with open("README.md", "r", encoding="utf-8") as file:
         return file.read()
