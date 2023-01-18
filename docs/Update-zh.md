@@ -42,7 +42,13 @@
 [Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.4/)
 [Package](https://pypi.org/project/Technology-Note/0.0.4/)
 
-## Main
+## V0.0.5
 - 更改：优化了一些功能
 - **新功能**：增加栅栏加解密
 - 优化：部分功能实现逻辑
+
+[Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.5/)
+[Package](https://pypi.org/project/Technology-Note/0.0.5/)
+
+## Main
+暂未更新

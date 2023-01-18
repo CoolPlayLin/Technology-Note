@@ -42,7 +42,13 @@
 [Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.4/)
 [Package](https://pypi.org/project/Technology-Note/0.0.4/)
 
-## Main
+## V0.0.5
 - Changes: Optimized some features
 - **New**: Added fence encryption and decryption
 - Optimize: Some functions implement logic
+
+[Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.5/)
+[Package](https://pypi.org/project/Technology-Note/0.0.5/)
+
+## Main
+Not Found
