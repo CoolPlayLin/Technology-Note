@@ -143,7 +143,7 @@ class Encrypt(Password):
             _Password += each
 
         return _Password
-        
+
 class Decrypt(Password):
     def __init__(self) -> None:
         super().__init__()
