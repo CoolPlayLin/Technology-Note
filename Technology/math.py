@@ -35,4 +35,5 @@ def PascalTriangle_Loop() -> list:
 
 # 调试
 if __name__ == "__main__":
-    pass
+    for each in PascalTriangle(10):
+        print(each)
