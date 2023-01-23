@@ -1,3 +1,4 @@
+import base64
 __all__ = ["Dictionary", "Encrypt", "Decrypt"]
 
 class PasswordError(Exception):
@@ -45,6 +46,9 @@ class Password:
             else:
                 Group2.append(each)
         return Group1, Group2
+    # 使用Base64加密
+    def Base64Encrypt(self, Text:str) -> str:
+        return base64.b64encode(Text.encode("utf-8")).decode("utf-8")
 
 
 class Dictionary(Password):
@@ -88,7 +92,7 @@ class Encrypt(Password):
         super().__init__()
     
  
-    def Substitution(self, Text:str, Dictionary:dict, Mode:str="Strict", Add_Ignore:bool=True) -> str:
+    def Substitution(self, Text:str, Dictionary:dict, Mode:str="Strict", Add_Ignore:bool=True, UseBase64:bool=False) -> str:
         """
         Text
             Text that needs to be encrypted
@@ -109,19 +113,19 @@ class Encrypt(Password):
         _ErrorMessage = super().Export_ErrorMessage_Decrypt_Encrypt(Text, Dictionary, Mode, _Undefined)
         if bool(_ErrorMessage):
             raise PasswordError(_ErrorMessage)
-        _ModeType, _Password = self.Mode.index(Mode), ""
+        _ModeType, _Encrypted = self.Mode.index(Mode), ""
         # 添加默认忽略字符
         if Add_Ignore:
             Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore))
         if _ModeType == 2 and bool(_Undefined):
             Dictionary.update(super().Export_Undefined_Dictionary(_Undefined)) # Retain模式添加未定义的字符
-        _PasswordList = [Dictionary[each] for each in Text] if _ModeType in [0, 2] else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType in [1] else None # 加密
-        for each in _PasswordList:
-            _Password += each
+        _EncryptedList = [Dictionary[each] for each in Text] if _ModeType in [0, 2] else [Dictionary[each] for each in Text if each in Dictionary] if _ModeType in [1] else None # 加密
+        for each in _EncryptedList:
+            _Encrypted += each
 
-        return _Password
+        return _Encrypted if UseBase64 else super().Base64Encrypt(_Encrypted)
     
-    def Fence(self, Text:str) -> str:
+    def Fence(self, Text:str, UseBase64:bool=False) -> str:
         """
         Use the fence password to encrypt plaintext
 
@@ -133,16 +137,15 @@ class Encrypt(Password):
         if bool(_ErrorMessage):
             raise PasswordError(_ErrorMessage)
         Group1, Group2 = super().Split_Text_Fence(Text) # 文本分组
-        _PasswordList, _Password = [], ""
+        _EncryptedList, _Encrypted = [], ""
         _Times = len(Group1) if len(Group1) == len(Group2) or len(Group1) > len(Group2) else len(Group2) # 确定遍历次数
         # 加密成列表
-        for each in range(_Times):
-            _PasswordList.append(Group1[each] if each > len(Group2)-1 else Group2[each] if each > len(Group1)-1 else Group1[each]+Group2[each])
+        _EncryptedList = [Group1[each] if each > len(Group2)-1 else Group2[each] if each > len(Group1)-1 else Group1[each]+Group2[each] for each in range(_Times)]
         # 转换为字符串
-        for each in _PasswordList:
-            _Password += each
+        for each in _EncryptedList:
+            _Encrypted += each
 
-        return _Password
+        return _Encrypted if UseBase64 else super().Base64Encrypt(_Encrypted)
 
 class Decrypt(Password):
     def __init__(self) -> None:
@@ -194,16 +197,15 @@ class Decrypt(Password):
         if bool(_ErrorMessage):
             raise PasswordError(_ErrorMessage)
         Group1, Group2 = super().Split_Text_Fence(Password)
-        _PasswordList, _Password = [], ""
+        _DecryptedList, _Decrypted = [], ""
         _Times = len(Group1) if len(Group1) == len(Group2) or len(Group1) > len(Group2) else len(Group2) # 确定遍历次数
         # 加密成列表
-        for each in range(_Times):
-            _PasswordList.append(Group1[each] if each > len(Group2)-1 else Group2[each] if each > len(Group1)-1 else Group1[each]+Group2[each])
+        _DecryptedList = [Group1[each] if each > len(Group2)-1 else Group2[each] if each > len(Group1)-1 else Group1[each]+Group2[each] for each in range(_Times)]
         # 转换为字符串
-        for each in _PasswordList:
-            _Password += each
-        
-        return _Password
+        for each in _DecryptedList:
+            _Decrypted += each
+
+        return _Decrypted
 # 调试
 if __name__ == "__main__":
     pass

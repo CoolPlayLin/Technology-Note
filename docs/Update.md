@@ -52,3 +52,4 @@
 
 ## Main
 - **NEW**: Add spider module
+- **NEW**: Class Encrypt can output encrypted characters using Base64
