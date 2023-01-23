@@ -50,8 +50,14 @@
 [Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.5/)
 [Package](https://pypi.org/project/Technology-Note/0.0.5/)
 
-## Main
+## V0.0.6
 - **NEW**: Add spider module
 - **NEW**: Class Encrypt can output encrypted characters using Base64
 - Optimize: Refine the custom error types
 - Change: Add more function document and add Base64 Decrypt.
+- Update: Optimize the Spider module
+
+[Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.6/)
+[Package](https://pypi.org/project/Technology-Note/0.0.6/)
+
+## Main

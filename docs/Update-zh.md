@@ -50,8 +50,14 @@
 [Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.5/)
 [Package](https://pypi.org/project/Technology-Note/0.0.5/)
 
-## Main
+## V0.0.5
 - **新功能**：增加spider模块
 - **新功能**：类Encrypt可使用Base64输出加密字符
 - 更新：细化自定义错误种类
 - 更改：补充更多的函数文档，增加Base64解密
+- 更新：优化Spider模块
+
+[Release](https://github.com/CoolPlayLin/Technology-Note/releases/tag/0.0.6/)
+[Package](https://pypi.org/project/Technology-Note/0.0.6/)
+
+## Main
