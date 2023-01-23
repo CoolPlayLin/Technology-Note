@@ -1,7 +1,21 @@
 import base64
 __all__ = ["Dictionary", "Encrypt", "Decrypt"]
 
+# 自定义错误
 class PasswordError(Exception):
+    """
+    Base class for all custom errors in this module
+    """
+    pass
+class EncryptError(PasswordError):
+    """
+    Errors encountered during encryption
+    """
+    pass
+class DecryptError(PasswordError):
+    """
+    Errors encountered during decryption
+    """
     pass
 
 class Password:
@@ -47,11 +61,16 @@ class Password:
                 Group2.append(each)
         return Group1, Group2
     # 使用Base64加密
-    def Base64Encrypt(self, Text:str) -> str:
-        return base64.b64encode(Text.encode("utf-8")).decode("utf-8")
-
+    def Base64_Action(self, Text:str, Mode:str) -> str:
+        if Mode == "Encode":
+            return base64.b64encode(Text.encode("utf-8")).decode("utf-8")
+        elif Mode == "Decode":
+            return base64.b64decode(Text.encode("utf-8")).decode("utf-8")
 
 class Dictionary(Password):
+    """
+    This class is used to generate dictionaries.
+    """
     def __init__(self) -> None:
         super().__init__()
 
@@ -88,6 +107,9 @@ class Dictionary(Password):
         return _Dictionary
 
 class Encrypt(Password):
+    """
+    This class is used to encrypt text.
+    """
     def __init__(self) -> None:
         super().__init__()
     
@@ -112,7 +134,7 @@ class Encrypt(Password):
         # 错误检查
         _ErrorMessage = super().Export_ErrorMessage_Decrypt_Encrypt(Text, Dictionary, Mode, _Undefined)
         if bool(_ErrorMessage):
-            raise PasswordError(_ErrorMessage)
+            raise EncryptError(_ErrorMessage)
         _ModeType, _Encrypted = self.Mode.index(Mode), ""
         # 添加默认忽略字符
         if Add_Ignore:
@@ -123,7 +145,7 @@ class Encrypt(Password):
         for each in _EncryptedList:
             _Encrypted += each
 
-        return _Encrypted if UseBase64 else super().Base64Encrypt(_Encrypted)
+        return _Encrypted if not UseBase64 else super().Base64_Action(_Encrypted, "Encode")
     
     def Fence(self, Text:str, UseBase64:bool=False) -> str:
         """
@@ -135,7 +157,7 @@ class Encrypt(Password):
         # 错误检查
         _ErrorMessage = super().Export_ErrorMessage_Fence(Text)
         if bool(_ErrorMessage):
-            raise PasswordError(_ErrorMessage)
+            raise EncryptError(_ErrorMessage)
         Group1, Group2 = super().Split_Text_Fence(Text) # 文本分组
         _EncryptedList, _Encrypted = [], ""
         _Times = len(Group1) if len(Group1) == len(Group2) or len(Group1) > len(Group2) else len(Group2) # 确定遍历次数
@@ -145,13 +167,16 @@ class Encrypt(Password):
         for each in _EncryptedList:
             _Encrypted += each
 
-        return _Encrypted if UseBase64 else super().Base64Encrypt(_Encrypted)
+        return _Encrypted if not UseBase64 else super().Base64_Action(_Encrypted, "Encode")
 
 class Decrypt(Password):
+    """
+    This class is used to decrypt password.
+    """
     def __init__(self) -> None:
         super().__init__()
     
-    def Substitution(self, Password:str, Dictionary:dict, Mode:str="Strict", Add_Ignore:bool=True) -> str:
+    def Substitution(self, Password:str, Dictionary:dict, Mode:str="Strict", Add_Ignore:bool=True, UseBase64:bool=False) -> str:
         """
         Text
             Text that needs to be decrypted
@@ -167,25 +192,26 @@ class Decrypt(Password):
             Ignore: Ignore and discard all characters that are not included in the dictionary.
             Retain: Keep undefined characters (undefined characters are automatically added to the dictionary)
         """
+        _Password = Password if not UseBase64 else super().Base64_Action(Password, "Decode")
         Dictionary = {Value:Key for Key, Value in Dictionary.items()}
-        _Undefined = super().Export_Undefined(Password, Dictionary)
+        _Undefined = super().Export_Undefined(_Password, Dictionary)
         _ModeType, _Text = self.Mode.index(Mode), ""
-        _ErrorMessage = super().Export_ErrorMessage_Decrypt_Encrypt(Password, Dictionary, Mode, _Undefined)
+        _ErrorMessage = super().Export_ErrorMessage_Decrypt_Encrypt(_Password, Dictionary, Mode, _Undefined)
         # 错误检查
         if bool(_ErrorMessage):
-            raise PasswordError(_ErrorMessage)
+            raise DecryptError(_ErrorMessage)
         if Add_Ignore:
             Dictionary.update(super().Export_Undefined_Dictionary(self.Ignore)) # 增加默认忽略的字符
         if _ModeType == 2 and bool(_Undefined):
             Dictionary.update(super().Export_Undefined_Dictionary(_Undefined)) # Retain模式添加未定义的字符
-        _TextList = [Dictionary[each] for each in Password] if _ModeType in [0, 2] else [Dictionary[each] for each in Password if each in Dictionary] if _ModeType in [1] else None # 加密
+        _TextList = [Dictionary[each] for each in _Password] if _ModeType in [0, 2] else [Dictionary[each] for each in _Password if each in Dictionary] if _ModeType in [1] else None # 加密
         # 将列表转换成字符
         for each in _TextList:
             _Text += each
         
         return _Text
 
-    def Fence(self, Password:str) -> str:
+    def Fence(self, Password:str, UseBase64:bool=False) -> str:
         """
         Use the fence password to decrypt password
 
@@ -193,10 +219,11 @@ class Decrypt(Password):
             Text that needs to be decrypt
         """
         # 错误检查
-        _ErrorMessage = super().Export_ErrorMessage_Fence(Password)
+        _Password = Password if not UseBase64 else super().Base64_Action(Password, "Decode")
+        _ErrorMessage = super().Export_ErrorMessage_Fence(_Password)
         if bool(_ErrorMessage):
-            raise PasswordError(_ErrorMessage)
-        Group1, Group2 = super().Split_Text_Fence(Password)
+            raise DecryptError(_ErrorMessage)
+        Group1, Group2 = super().Split_Text_Fence(_Password)
         _DecryptedList, _Decrypted = [], ""
         _Times = len(Group1) if len(Group1) == len(Group2) or len(Group1) > len(Group2) else len(Group2) # 确定遍历次数
         # 加密成列表

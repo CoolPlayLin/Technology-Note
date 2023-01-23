@@ -53,3 +53,5 @@
 ## Main
 - **NEW**: Add spider module
 - **NEW**: Class Encrypt can output encrypted characters using Base64
+- Optimize: Refine the custom error types
+- Change: Add more function document and add Base64 Decrypt.
