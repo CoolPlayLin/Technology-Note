@@ -61,3 +61,4 @@
 [Package](https://pypi.org/project/Technology-Note/0.0.6/)
 
 ## Main
+- **New**: Change object encryption and decryption logic (no longer compatible with previous versions)

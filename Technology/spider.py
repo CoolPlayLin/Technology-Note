@@ -2,7 +2,10 @@ __all__ = ["Spiders"]
 class SpiderError(Exception):
     pass
 
-import requests, base64
+import base64
+
+import requests
+
 
 class Spiders:
     def __init__(self) -> None:

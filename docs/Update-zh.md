@@ -61,3 +61,4 @@
 [Package](https://pypi.org/project/Technology-Note/0.0.6/)
 
 ## Main
+- **新特性**：更改对象加密解密逻辑（不再兼容以前版本）
