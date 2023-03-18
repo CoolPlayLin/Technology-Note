@@ -5,3 +5,6 @@ init:
 	python -m pip install build setuptools wheel
 build:
 	python -m build
+ci:
+	python -m pip install isort
+	python -m isort . --diff >> Report.txt

@@ -1,5 +1,7 @@
-import setuptools
 import pathlib
+
+import setuptools
+
 
 def File_Read():
     if not (pathlib.Path("README.md")).exists():
@@ -12,7 +14,7 @@ def File_Read():
 def Main():
     setuptools.setup(
             name="Technology-Note",
-            version="0.0.6",
+            version="0.1.0",
             author="CoolPlayLin",
             author_email="help@api-coolplaylin.eu.org",
             description="Learn the techniques developed in Python",
